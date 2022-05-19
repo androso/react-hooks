@@ -212,7 +212,7 @@ function calculateWinner(squares) {
   return null
 }
 
-function useLocalStorage(
+export function useLocalStorage(
   key,
   initialValue = '',
   {serialize = JSON.stringify, deserialize = JSON.parse} = {},
