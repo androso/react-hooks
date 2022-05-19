@@ -20,7 +20,7 @@ function Child() {
     console.log('%c    Child: useEffect(() => {})', 'color: LightCoral')
     return () => {
       console.log(
-        '%c    Child: useEffect(() => {}) cleanup 🧹',
+        '%c    Child: useEffect(() => {}) cleanpnup 🧹',
         'color: LightCoral',
       )
     }
