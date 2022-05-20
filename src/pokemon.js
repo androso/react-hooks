@@ -7,7 +7,7 @@ const formatDate = date =>
   ).padStart(2, '0')}.${String(date.getMilliseconds()).padStart(3, '0')}`
 
 // the delay argument is for faking things out a bit
-function fetchPokemon(name, delay = 1500) {
+function fetchPokemon(name, delay = 1500, abortController) {
   const pokemonQuery = `
     query PokemonInfo($name: String) {
       pokemon(name: $name) {
@@ -39,6 +39,7 @@ function fetchPokemon(name, delay = 1500) {
         query: pokemonQuery,
         variables: {name: name.toLowerCase()},
       }),
+      signal: abortController.signal
     })
     .then(async response => {
       const {data} = await response.json()
