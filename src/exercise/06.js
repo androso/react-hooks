@@ -10,46 +10,52 @@ import {
 } from '../pokemon'
 
 function PokemonInfo({pokemonName}) {
-  const [pokemon, setPokemon] = React.useState(null)
-  const [error, setError] = React.useState(null)
+  const [state, setState] = React.useState(() => ({
+    status: 'idle',
+    pokemon: null,
+    error: null,
+  }))
 
   React.useEffect(() => {
     let controller = new AbortController()
-
     if (!pokemonName) {
       return
     }
-    setPokemon(null)
-    setError(null)
+
+    
+    setState({...state, status: 'pending'})
 
     fetchPokemon(pokemonName, 1500, controller)
-      .then(pokemonData => setPokemon(pokemonData))
+      .then(pokemonData => {
+        
+        setState({...state, status: 'resolved', pokemon: pokemonData})
+      })
       .catch(error => {
         if (error.name === 'AbortError') {
           console.log('Fetch cancelled !')
         } else {
-          setError(error)
+          
+          setState({...state, error, status: 'rejected'})
         }
       })
 
     return () => {
-      console.log('unmounting fetch effect')
       controller.abort()
     }
   }, [pokemonName])
 
-  if (!pokemonName) {
+  if (state.status === 'idle') {
     return 'submit a pokemon'
-  } else if (error) {
+  } else if (state.status === 'rejected') {
     return (
       <div role="alert">
         There was an error:{' '}
-        <pre style={{whiteSpace: 'normal'}}>{error.message}</pre>
+        <pre style={{whiteSpace: 'normal'}}>{state.error.message}</pre>
       </div>
     )
-  } else if (pokemon) {
-    return <PokemonDataView pokemon={pokemon} />
-  } else {
+  } else if (state.status === 'resolved') {
+    return <PokemonDataView pokemon={state.pokemon} />
+  } else if (state.status === 'pending') {
     return <PokemonInfoFallback name={pokemonName} />
   }
 }
