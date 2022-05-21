@@ -9,6 +9,31 @@ import {
   PokemonDataView,
 } from '../pokemon'
 
+class ErrorBoundary extends React.Component {
+  constructor(props) {
+    super(props)
+    this.state = {
+      hasError: false,
+    }
+  }
+
+  static getDerivedStateFromError(error) {
+    return {hasError: true}
+  }
+
+  componentDidCatch(error, errorInfo) {
+    console.log({error, errorInfo})
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return <h1>Something went really wrong </h1>
+    } else {
+      return this.props.children
+    }
+  }
+}
+
 function PokemonInfo({pokemonName}) {
   const [state, setState] = React.useState(() => ({
     status: 'idle',
@@ -22,19 +47,16 @@ function PokemonInfo({pokemonName}) {
       return
     }
 
-    
     setState({...state, status: 'pending'})
 
     fetchPokemon(pokemonName, 1500, controller)
       .then(pokemonData => {
-        
         setState({...state, status: 'resolved', pokemon: pokemonData})
       })
       .catch(error => {
         if (error.name === 'AbortError') {
           console.log('Fetch cancelled !')
         } else {
-          
           setState({...state, error, status: 'rejected'})
         }
       })
@@ -47,12 +69,7 @@ function PokemonInfo({pokemonName}) {
   if (state.status === 'idle') {
     return 'submit a pokemon'
   } else if (state.status === 'rejected') {
-    return (
-      <div role="alert">
-        There was an error:{' '}
-        <pre style={{whiteSpace: 'normal'}}>{state.error.message}</pre>
-      </div>
-    )
+    throw state.error
   } else if (state.status === 'resolved') {
     return <PokemonDataView pokemon={state.pokemon} />
   } else if (state.status === 'pending') {
@@ -72,7 +89,9 @@ function App() {
       <PokemonForm pokemonName={pokemonName} onSubmit={handleSubmit} />
       <hr />
       <div className="pokemon-info">
-        <PokemonInfo pokemonName={pokemonName} />
+        <ErrorBoundary>
+          <PokemonInfo pokemonName={pokemonName} />
+        </ErrorBoundary>
       </div>
     </div>
   )
