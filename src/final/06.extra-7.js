@@ -57,7 +57,6 @@ function ErrorFallback({error, resetErrorBoundary}) {
     </div>
   )
 }
-
 function App() {
   const [pokemonName, setPokemonName] = React.useState('')
 
